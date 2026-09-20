@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#050805">
+  <meta name="description" content="Anjana B is a frontend developer creating responsive, user-friendly web experiences.">
+  <title>Anjana B — Frontend Developer</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="site-shell">
+    <header class="site-header container">
+      <a class="brand" href="#home" aria-label="Anjana B, home">Anjana <span>B</span></a>
+      <button class="menu-toggle" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button>
+      <nav class="site-nav" id="site-nav" aria-label="Main navigation">
+        <a class="active" href="#home">Home</a><a href="#about">About</a><a href="#skills">Skills</a><a href="#projects">Projects</a><a href="#education">Education</a><a href="#contact">Contact</a>
+      </nav>
+      <a class="header-cta" href="#contact">Let's Connect <span aria-hidden="true">↗</span></a>
+    </header>
+
+    <main>
+      <section class="hero" id="home" aria-labelledby="hero-title">
+        <div class="stars" aria-hidden="true"></div>
+        <div class="hero-inner container">
+          <div class="hero-copy">
+            <div class="eyebrow"><span>Frontend Developer</span><i></i></div>
+            <h1 id="hero-title">Designing Ideas<br>into <em>Interactive<br>Experiences</em></h1>
+            <p class="hero-description">I build modern, responsive, and user-friendly web interfaces that make an impact.</p>
+            <div class="hero-actions">
+              <a class="button button-primary" href="#projects">View My Work <span aria-hidden="true">⟶</span></a>
+              <a class="button button-outline" href="#contact">Get in Touch <span aria-hidden="true">↗</span></a>
+            </div>
+            <div class="stats" aria-label="At a glance">
+              <div class="stat"><strong>3<span>+</span></strong><span>Internships<br>Completed</span><b aria-hidden="true">▣</b></div>
+              <div class="stat"><strong>4<span>+</span></strong><span>Core Technologies<br>Explored</span><b aria-hidden="true">⌘</b></div>
+              <div class="stat"><strong>100<span>%</span></strong><span>Passion for Creating<br>Better Web</span><b aria-hidden="true">♥</b></div>
+            </div>
+          </div>
+
+          <div class="hero-art" aria-label="Illustration of a laptop displaying frontend code">
+            <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
+            <div class="float-card design-card"><div class="figma-mark"><i></i><i></i><i></i><i></i><i></i></div><span>Design<br>Plan<br>Create<br>Build<br>Repeat</span></div>
+            <div class="laptop">
+              <div class="laptop-screen">
+                <div class="window-bar"><span></span><span></span><span></span></div>
+                <div class="editor">
+                  <div class="editor-sidebar"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+                  <div class="code-lines"><div><span class="purple">function</span> <span class="mint">create</span>() {</div><div class="indent"><span class="purple">return</span> (</div><div class="indent2"><span class="purple">&lt;div&gt;</span></div><div class="indent3"><span class="purple">&lt;h1&gt;</span><span class="green">Better</span></div><div class="indent4 green">Web Experiences</div><div class="indent3 purple">&lt;/h1&gt;</div><div class="indent2 purple">&lt;/div&gt;</div><div class="indent">);</div><div>}</div></div>
+                </div>
+              </div>
+              <div class="laptop-base"><div class="keyboard"></div><div class="trackpad"></div></div>
+            </div>
+            <div class="float-card code-card"><div class="code-icon">&lt;/&gt;</div><span>Clean Code<br>Responsive<br>Modern UI<br>Real Impact</span></div>
+            <div class="float-card bottom-card">Ideas to Interfaces <span>●</span></div>
+            <div class="handwritten">Websites<br>that make<br>a Difference<span></span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="content-section about-section" id="about">
+        <div class="container section-grid">
+          <div><p class="section-kicker">01 / About me</p><h2>Curiosity meets <span>code.</span></h2></div>
+          <div class="section-copy"><p>I'm Anjana B, a Computer Science Engineering student at SBCE with a love for building intuitive, responsive websites. My interest in how the web works led me from designing interfaces to exploring the logic behind them.</p><p>I enjoy combining creative problem-solving with an analytical mindset, and I'm always learning new ways to make digital experiences more useful and enjoyable.</p><a class="text-link" href="https://github.com/anjanareghu" target="_blank" rel="noopener noreferrer">Explore my GitHub <span aria-hidden="true">↗</span></a></div>
+        </div>
+      </section>
+
+      <section class="content-section skills-section" id="skills">
+        <div class="container"><p class="section-kicker">02 / What I use</p><div class="section-heading"><h2>Skills & <span>tools.</span></h2><p>Technologies I use to turn ideas into working web experiences.</p></div><div class="skill-grid"><div class="skill-card"><span class="skill-symbol">&lt;/&gt;</span><h3>HTML</h3><p>Semantic structure</p></div><div class="skill-card"><span class="skill-symbol">{ }</span><h3>CSS</h3><p>Responsive styling</p></div><div class="skill-card"><span class="skill-symbol">JS</span><h3>JavaScript</h3><p>Interactive experiences</p></div><div class="skill-card"><span class="skill-symbol">Py</span><h3>Python</h3><p>Logic & data</p></div></div></div>
+      </section>
+
+      <section class="content-section projects-section" id="projects">
+        <div class="container"><p class="section-kicker">03 / Experience</p><div class="section-heading"><h2>Learning by <span>doing.</span></h2><p>Hands-on experience across web development and data science.</p></div><div class="project-grid"><article class="project-card"><span class="project-number">01</span><div><span class="project-type">Full Stack Development · July 2024</span><h3>Pace Lab</h3><p>Developed responsive websites and worked on data science projects using HTML, CSS, JavaScript, and Python.</p></div><span class="project-arrow" aria-hidden="true">↗</span></article><article class="project-card"><span class="project-number">02</span><div><span class="project-type">Data Science · August 2024</span><h3>Prodigy InfoTech</h3><p>Expanded my practical understanding of data science through an industry internship.</p></div><span class="project-arrow" aria-hidden="true">↗</span></article><article class="project-card"><span class="project-number">03</span><div><span class="project-type">Data Science · August 2024</span><h3>Intrainz Innovations</h3><p>Explored data-driven problem solving in a professional learning environment.</p></div><span class="project-arrow" aria-hidden="true">↗</span></article></div><p class="project-note">These are internships from my previous portfolio. <a href="https://github.com/anjanareghu" target="_blank" rel="noopener noreferrer">See my code on GitHub ↗</a></p></div>
+      </section>
+
+      <section class="content-section education-section" id="education"><div class="container"><p class="section-kicker">04 / My journey</p><h2>Education<span>.</span></h2><div class="education-list"><div><span>2022 – 2026</span><h3>B.Tech · Computer Science Engineering</h3><p>SBCE</p></div><div><span>2022</span><h3>Higher Secondary</h3><p>RVSM HSS</p></div><div><span>2020</span><h3>Secondary School</h3><p>Sree Narayana Central School</p></div></div></div></section>
+
+      <section class="content-section contact-section" id="contact"><div class="container contact-layout"><div><p class="section-kicker">05 / Let's talk</p><h2>Have an idea?<br><span>Let's build it.</span></h2><p>I'm open to opportunities, collaborations, and conversations about creating better web experiences.</p></div><div class="contact-panel"><span class="contact-panel-icon">↗</span><p>Let's make something meaningful together.</p><a class="button button-primary" href="https://www.linkedin.com/in/anjana-b-b0b865204/" target="_blank" rel="noopener noreferrer">Connect on LinkedIn <span aria-hidden="true">↗</span></a><a class="contact-secondary" href="https://github.com/anjanareghu" target="_blank" rel="noopener noreferrer">Or explore my GitHub ↗</a></div></div></section>
+    </main>
+    <footer class="footer container"><a class="brand" href="#home">Anjana <span>B</span></a><p>© <span id="year"></span> Anjana B. Designed to make a difference.</p><a href="#home">Back to top ↑</a></footer>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
