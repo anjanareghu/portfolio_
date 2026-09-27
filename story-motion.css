@@ -1,0 +1,39 @@
+/* Keep all text present, including before JS and when motion is disabled. */
+.story-host { position: relative; }
+.character-anchor { position: absolute; top: 65px; right: 5px; width: 132px; height: 132px; pointer-events: none; }
+#about .character-anchor { top: 65px; right: 10px; width: 180px; height: 180px; }
+#recognition .character-anchor { top: 98px; }
+#contact .character-anchor { top: 68px; }
+.scene-divider { position: absolute; top: 0; left: 0; right: 0; height: 1px; background: var(--line); pointer-events: none; transform-origin: left; }
+.story-motion .scene-divider { transform: scaleX(calc(.2 + var(--section-progress, 1) * .8)); }
+.story-word { display: inline-block; white-space: nowrap; }
+.story-unit { display: inline-block; }
+.story-motion .story-unit {
+  --unit-progress: clamp(0, calc((var(--story-progress, 1) - var(--unit-delay, 0)) * 1.32), 1);
+  opacity: calc(.8 + .2 * var(--unit-progress));
+  transform: translate3d(0, calc((1 - var(--unit-progress)) * 9px), 0);
+}
+.story-motion .story-text:not(.story-split) { opacity: calc(.85 + .15 * var(--story-progress, 1)); translate: 0 calc((1 - var(--story-progress, 1)) * 6px); }
+.story-motion .story-label { translate: calc((1 - var(--story-progress, 1)) * -5px) 0; }
+.story-motion .story-text:focus-within, .story-motion .story-text:focus-within .story-unit { opacity: 1; transform: none; translate: none; }
+/* Native photo-story transitions own their text; avoid double transforms. */
+.is-scroll-story .recognition-copy .story-unit { opacity: 1; transform: none; }
+.is-scroll-story .recognition-copy .story-text { opacity: 1; translate: none; }
+.story-light .story-unit { opacity: 1; transform: none; }
+.story-light .story-text { opacity: calc(.9 + .1 * var(--story-progress, 1)); translate: 0 calc((1 - var(--story-progress, 1)) * 3px); }
+.motion-disabled .story-text, .motion-disabled .story-unit { opacity: 1; transform: none; translate: none; }
+.motion-disabled .scene-divider { transform: none; }
+@media (min-width: 761px) {
+  #work .section-heading, #research .section-heading, #experience .section-heading,
+  .recognition-heading h2, #contact h2 { padding-right: 160px; }
+}
+@media (max-width: 760px) {
+  .character-anchor, #about .character-anchor, #recognition .character-anchor, #contact .character-anchor { width: 56px; height: 56px; right: 0; top: 30px; }
+  #about .character-anchor { top: 14px; }
+  #recognition .character-anchor { top: 58px; }
+  #contact .character-anchor { top: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .story-text, .story-unit { opacity: 1 !important; transform: none !important; translate: none !important; }
+  .scene-divider { transform: none !important; }
+}
