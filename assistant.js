@@ -21,10 +21,10 @@
   let context = { section: 'home', entity: null }, contextKey = '';
   let contextPrompt = 'What is Anjana working on?';
   let contextFrame = 0, busy = false, request = 0, previousTopic = null;
-  let restoreFocus = true, invitationSeen = false;
+  let restoreFocus = true;
   const questions = [
     'What has Anjana built?', "What's her tech stack?", 'Tell me about her experience.',
-    'What are her achievements?', 'Where did she study?', 'How can I contact Anjana?',
+    'What are her achievements?', 'Where did she study?', 'How can I contact Anjana?', 'Tell me about her research.',
   ];
 
   function element(tag, className, content) {
@@ -50,7 +50,6 @@
   }
   function open() {
     if (panel.open) { dismiss(); return; }
-    invitationSeen = true;
     launcher.classList.remove('is-inviting');
     restoreFocus = true;
     viewport();
@@ -110,7 +109,7 @@
   function renderSuggestions(section) {
     // Context rotates the suggestions; they never move under a keyboard user's focus.
     if (suggestions.contains(document.activeElement)) return;
-    const offsets = { home: 0, work: 0, about: 1, experience: 2, recognition: 3, contact: 4 };
+    const offsets = { home: 0, work: 0, about: 1, research: 6, experience: 2, recognition: 3, contact: 4 };
     const offset = offsets[section] || 0;
     suggestions.replaceChildren(...Array.from({ length: 4 }, (_, index) => {
       const question = questions[(offset + index) % questions.length];
@@ -131,10 +130,11 @@
     let entity = null;
     let prompt = 'What is Anjana working on?';
     let label = 'Want a quick introduction?';
-    let title = { home: 'Introduction', work: 'Projects', about: 'About & skills', experience: 'Experience', recognition: 'Recognition', contact: 'Contact' }[id];
+    let title = { home: 'Introduction', work: 'Projects', about: 'About & skills', research: 'Research', experience: 'Experience', recognition: 'Recognition', contact: 'Contact' }[id];
     if (id === 'work') {
-      const tab = document.querySelector('[data-tab-list] [aria-selected="true"]');
-      entity = tab?.dataset.panel.replace('panel-', '') || 'remind';
+      const projects = [...section.querySelectorAll('.project-card')];
+      const visible = projects.reduce((best, candidate) => Math.abs(candidate.getBoundingClientRect().top - line) < Math.abs(best.getBoundingClientRect().top - line) ? candidate : best, projects[0]);
+      entity = visible?.id.replace('panel-', '') || 'remind';
       const project = source.knowledge.projects.find(item => item.id === entity);
       prompt = `How was ${project?.name || 'NeuroWeave'} built?`;
       label = 'Want to know how this was built?';
@@ -152,6 +152,7 @@
       if (entity === 'ai-insight') prompt = 'Tell me about the AI Insight achievement.';
       label = 'Ask me about this achievement';
     } else if (id === 'about') { prompt = "What's her tech stack?"; label = 'Explore the tools behind her work'; }
+    else if (id === 'research') { prompt = 'Tell me about her research.'; label = 'Explore the published work'; }
     else if (id === 'experience') { prompt = 'Tell me about her experience.'; label = 'Where has Anjana worked?'; }
     else if (id === 'contact') { prompt = 'How can I contact Anjana?'; label = 'Start a conversation with Anjana'; }
     const key = `${id}:${entity}`;
@@ -173,7 +174,7 @@
 
   function navigate(item, keyboard) {
     dismiss(false);
-    const behavior = reduced.matches || keyboard ? 'instant' : 'smooth';
+    const behavior = reduced.matches || window.PortfolioMotion?.disabled || keyboard ? 'instant' : 'smooth';
     // Let the native modal restore page interaction before changing the document.
     requestAnimationFrame(() => {
       if (item.tab) document.getElementById(item.tab)?.click();
@@ -208,6 +209,8 @@
         if (item.section && document.getElementById(item.section)) {
           link.href = `#${item.section}`;
           link.addEventListener('click', event => { event.preventDefault(); navigate(item, event.detail === 0); });
+        } else if (item.href && (window.PortfolioProjects || []).some(project => item.href === `projects/${project.slug}.html`)) {
+          link.href = item.href;
         } else if (item.href && /^https:\/\//.test(item.href)) {
           link.href = item.href;
           link.target = '_blank';
@@ -285,9 +288,4 @@
   launcher.hidden = false;
   log.setAttribute('aria-live', 'off');
   updateContext();
-  setTimeout(() => {
-    if (invitationSeen || document.hidden || reduced.matches || document.querySelector('dialog[open]')) return;
-    launcher.classList.add('is-inviting');
-    setTimeout(() => launcher.classList.remove('is-inviting'), 6000);
-  }, 12000);
 })();

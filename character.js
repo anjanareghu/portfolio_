@@ -16,13 +16,13 @@
   const smooth = value => value * value * (3 - 2 * value);
   let gl, program, buffer, uniforms;
   let shaders = [];
-  let ready = false, failed = false, lost = false, paused = false;
+  let ready = false, failed = false, lost = false, paused = !!window.PortfolioMotion?.disabled;
   let frame = 0, lastFrame = 0, elapsed = 0;
   let scrollPosition = window.scrollY;
   let pointer = null;
   let lookX = 0, lookY = 0;
   let ctaLookTarget = null, gazeX = 0, gazeY = 0;
-  let metrics, stops, intro = null, opening = null;
+  let metrics, anchors = [], obstacles = [], intro = null, opening = null;
 
   const vertexSource = `
     attribute vec2 aPosition;
@@ -127,94 +127,108 @@
     const height = window.innerHeight;
     const mobile = width <= 760;
     // Leave room for the rotated static canvas on narrow screens.
-    const size = Math.min(mobile ? rect.width * 0.88 : rect.width + 24, rect.height, 540);
-    const small = mobile ? 116 : 174;
+    const size = Math.min(mobile ? rect.width * 0.88 : rect.width + 24, rect.height, 540) * .6;
     metrics = {
       width, height, size,
       x: rect.left + rect.width / 2,
       y: documentTop + rect.height * 0.47,
       heroBottom: documentTop + rect.height,
     };
-    // Follow every section, including the long pinned recognition gallery.
-    // Rebuild from document positions so tab changes and resized photos stay aligned.
-    const maxScroll = Math.max(1, document.documentElement.scrollHeight - height);
-    stops = [{ at: 0, x: metrics.x, y: metrics.y, size, roll: -8 }];
-    if (opening?.enabled) {
-      stops.push({ at: opening.start + opening.range, ...openingPose(1) });
-    }
-    let waypoint = 0;
-    const addStop = at => {
-      at = clamp(at, 1, maxScroll);
-      if (at <= stops[stops.length - 1].at) return;
-      const onRight = waypoint % 2 === 0;
-      stops.push({
-        at,
-        x: onRight ? width - small / 2 - 18 : small / 2 + 18,
-        y: height * (onRight ? .30 : .66),
-        size: small * (waypoint % 3 === 1 ? .92 : 1),
-        roll: onRight ? 9 : -11,
-      });
-      waypoint++;
-    };
-    document.querySelectorAll('main > section[id]:not(#home)').forEach(section => {
-      const bounds = section.getBoundingClientRect();
-      const start = bounds.top + window.scrollY - height * .55;
-      const end = Math.min(start + bounds.height, maxScroll);
-      addStop(start);
-      const segments = Math.max(1, Math.ceil(bounds.height / (height * 1.15)));
-      for (let i = 1; i < segments; i++) {
-        const at = start + bounds.height * i / segments;
-        if (at < end - 100) addStop(at);
-      }
+    metrics.header = width > 1000 ? document.querySelector('.site-header')?.offsetHeight || 0 : 0;
+    anchors = [...document.querySelectorAll('.character-anchor')].map(anchor => {
+      const bounds = anchor.getBoundingClientRect();
+      const host = anchor.parentElement.getBoundingClientRect();
+      const section = anchor.closest('section');
+      const sectionBounds = section.getBoundingClientRect();
+      return { id: section.id, x: bounds.left + bounds.width / 2,
+        y: bounds.top + scrollY + bounds.height / 2, size: bounds.width,
+        top: sectionBounds.top + scrollY, bottom: sectionBounds.bottom + scrollY,
+        gutter: Math.max(12, (document.documentElement.clientWidth || width) - host.right) };
     });
-    addStop(maxScroll);
+    // Cache actual text/image/control bounds only on layout changes. Empty heading
+    // space is available for the character; content and controls are protected.
+    obstacles = [];
+    document.querySelectorAll('main h2, main h3, main p:not([hidden]), main a, main button, .project-card, .recognition-media, .profile-evidence').forEach(element => {
+      if (element.closest('[hidden], dialog') || !element.getClientRects().length) return;
+      let bounds;
+      if (/^H[23]$|^P$/.test(element.tagName)) {
+        const range = document.createRange(); range.selectNodeContents(element);
+        bounds = range.getBoundingClientRect();
+      } else bounds = element.getBoundingClientRect();
+      if (bounds.width && bounds.height) obstacles.push({ left: bounds.left - 8, right: bounds.right + 8,
+        top: bounds.top + scrollY - 12, bottom: bounds.bottom + scrollY + 12 });
+    });
     stage.style.width = `${size}px`;
     stage.style.height = `${size}px`;
     if (ready) resizeCanvas();
     updateControl();
     activate();
   }
-  function poseAt(scroll) {
-    if (opening?.enabled) {
-      if (scroll < opening.start) return { x: metrics.x, y: metrics.y - scroll, size: metrics.size, roll: -8 };
-      if (scroll <= opening.start + opening.range) return openingPose(clamp((scroll - opening.start) / opening.range, 0, 1));
+  function overlaps(pose, scroll) {
+    const radius = pose.size * .52;
+    return obstacles.some(box => pose.x + radius > box.left && pose.x - radius < box.right &&
+      pose.y + scroll + radius > box.top && pose.y + scroll - radius < box.bottom);
+  }
+  function sectionPose(scroll) {
+    const touch = coarsePointer.matches || metrics.width <= 760;
+    let anchor = anchors[0];
+    for (const item of anchors) if (item.top <= scroll + metrics.height * .65) anchor = item;
+    if (!anchor) return { x: metrics.x, y: metrics.y - scroll, size: metrics.size, roll: -8, opacity: 1 };
+    const y = anchor.y - scroll;
+    const enter = smooth(clamp((metrics.height * .98 - y) / (metrics.height * .22), 0, 1));
+    const leave = smooth(clamp((y - metrics.header - anchor.size * .4) / (metrics.height * .20), 0, 1));
+    let weight = enter * leave;
+    const viewportWidth = document.documentElement.clientWidth || metrics.width;
+    const railSize = Math.min(36, Math.max(12, anchor.gutter - 10));
+    const sectionProgress = clamp((scroll + metrics.height * .5 - anchor.top) / Math.max(1, anchor.bottom - anchor.top), 0, 1);
+    const rail = { x: viewportWidth - anchor.gutter / 2, y: metrics.height * (.32 + .22 * sectionProgress), size: railSize, roll: -3, opacity: .78 };
+    if (touch) {
+      const pose = { x: anchor.x, y, size: Math.min(48, anchor.size), roll: -3 + 4 * sectionProgress, opacity: weight };
+      if (overlaps(pose, scroll)) pose.opacity = 0;
+      return pose;
     }
-    let index = 0;
-    while (index < stops.length - 2 && scroll > stops[index + 1].at) index++;
-    const a = stops[index], b = stops[index + 1];
-    const t = smooth(clamp((scroll - a.at) / (b.at - a.at), 0, 1));
-    const size = mix(a.size, b.size, t);
-    return {
-      x: clamp(mix(a.x, b.x, t), size / 2 + 8, metrics.width - size / 2 - 8),
-      y: mix(index === 0 ? a.y - scroll : a.y, b.y, t),
-      size,
-      roll: mix(a.roll, b.roll, t),
-    };
+    let pose;
+    for (let attempt = 0; attempt < 5; attempt++) {
+      pose = { x: mix(rail.x, anchor.x, weight), y: mix(rail.y, y, weight),
+        size: mix(rail.size, Math.min(180, anchor.size), weight),
+        roll: mix(-3, 3, sectionProgress), opacity: mix(.78, 1, weight) };
+      if (!overlaps(pose, scroll) && pose.y - pose.size * .52 > metrics.header + 8) return pose;
+      weight *= .45;
+    }
+    return rail;
+  }
+  function poseAt(scroll) {
+    const natural = { x: metrics.x, y: metrics.y - scroll, size: metrics.size, roll: -8, opacity: 1 };
+    if (opening?.enabled && scroll >= opening.start && scroll <= opening.start + opening.range) {
+      return openingPose(clamp((scroll - opening.start) / opening.range, 0, 1));
+    }
+    const end = opening?.enabled ? opening.start + opening.range : metrics.heroBottom - metrics.height * .12;
+    return scroll < end ? natural : sectionPose(scroll);
   }
   function openingPose(t) {
-    // Quadratic curve: a small move left/down, then toward the right-hand margin.
-    const size = mix(metrics.size, metrics.size * .64, t);
-    const a = 1 - t;
-    const startY = metrics.y - opening.start;
+    const reframe = smooth(clamp((t - .25) / .65, 0, 1));
+    const scroll = opening.start + t * opening.range;
+    const destination = sectionPose(scroll);
     return {
-      x: a * a * metrics.x + 2 * a * t * (metrics.x - metrics.width * .14) + t * t * (metrics.width - size * .65 - 24),
-      y: a * a * startY + 2 * a * t * (startY + metrics.height * .13) + t * t * metrics.height * .32,
-      size,
-      roll: mix(-8, -4, t),
+      x: mix(metrics.x, destination.x, reframe),
+      y: mix(metrics.y - opening.start, destination.y, reframe),
+      size: mix(metrics.size, destination.size, reframe),
+      roll: mix(-8, destination.roll, reframe), opacity: 1,
     };
   }
   function onScreen() {
     if (intro) return true;
     const pose = poseAt(window.scrollY);
-    return pose.y + pose.size / 2 > 0 && pose.y - pose.size / 2 < metrics.height;
+    return pose.opacity > .01 && pose.y + pose.size / 2 > 0 && pose.y - pose.size / 2 < metrics.height;
   }
+  function presenceAt(scroll) { return poseAt(scroll).opacity; }
   function updateControl() {
     const docked = !reducedMotion.matches && window.scrollY > metrics.heroBottom - metrics.height * .30;
     toggle.classList.toggle('is-docked', docked);
     // Fixed elements must escape the sticky scene's stacking context.
     if (docked && toggle.parentElement !== document.body) document.body.append(toggle);
     else if (!docked && toggle.parentElement !== toggleHome) toggleHome.append(toggle);
-    toggle.hidden = reducedMotion.matches;
+    toggle.hidden = false;
   }
   function compile(type, source) {
     const shader = gl.createShader(type);
@@ -267,7 +281,7 @@
     render(shouldAnimate());
   }
   function render(moving) {
-    stage.style.opacity = intro && intro.landing === 0 ? '0' : '1';
+    stage.style.opacity = intro ? (intro.landing === 0 ? '0' : '1') : String(moving ? presenceAt(window.scrollY) : 1);
     if (moving) {
       // One existing canvas, moved to the page overlay while travelling.
       if (stage.parentElement !== document.body) document.body.append(stage);
@@ -292,14 +306,12 @@
       }
       gazeX = mix(gazeX, gazeTargetX, 0.14);
       gazeY = mix(gazeY, gazeTargetY, 0.14);
-      const scrubbed = opening?.enabled && scrollPosition >= opening.start && scrollPosition <= opening.start + opening.range;
+      const scrubbed = (opening?.enabled && scrollPosition >= opening.start) || scrollPosition > metrics.heroBottom - metrics.height * .5;
       const bob = intro || scrubbed ? 0 : Math.sin(elapsed * 1.2) * 2.5 * pose.size / metrics.size;
-      const reach = coarsePointer.matches || intro || scrubbed ? 0 : 9;
-      // Include rotation in the bounds so cursor attraction never causes overflow.
-      const margin = pose.size * 0.62 + 8;
-      const x = clamp(pose.x + lookX * reach, margin, metrics.width - margin) - metrics.size / 2;
-      const y = clamp(pose.y + bob + lookY * reach * 0.65, margin, metrics.height - margin) - metrics.size / 2;
-      const roll = pose.roll + (intro || scrubbed ? 0 : lookX * 2);
+      // The viewport crops the shot; do not force the complete subject onscreen.
+      const x = pose.x - metrics.size / 2;
+      const y = pose.y + bob - metrics.size / 2;
+      const roll = pose.roll;
       stage.style.transform = `translate3d(${x.toFixed(2)}px, ${y.toFixed(2)}px, 0) scale(${(pose.size / metrics.size).toFixed(4)}) rotate(${roll.toFixed(2)}deg)`;
       stage.classList.add('character-travelling');
     } else {
@@ -314,8 +326,8 @@
     // CSS fallback follows the same route even when WebGL is unavailable or lost.
     if (!ready || lost) return;
     // A quick, occasional blink; the face always remains open in the static state.
-    const scrubbed = opening?.enabled && scrollPosition >= opening.start && scrollPosition <= opening.start + opening.range;
-    const sceneTime = scrubbed ? clamp((scrollPosition - opening.start) / opening.range, 0, 1) : elapsed;
+    const scrubbed = (opening?.enabled && scrollPosition >= opening.start) || scrollPosition > metrics.heroBottom - metrics.height * .5;
+    const sceneTime = scrubbed ? scrollPosition / Math.max(1, metrics.height) : elapsed;
     const blinkPhase = sceneTime % 6.4;
     const blink = moving && !scrubbed ? 1 - 0.88 * Math.exp(-Math.pow((blinkPhase - 5.7) / 0.075, 2)) : 1;
     gl.clear(gl.COLOR_BUFFER_BIT);
@@ -361,12 +373,10 @@
       else if (!intro && !onScreen()) stage.style.opacity = '0';
     }
   }
-  toggle.addEventListener('click', () => {
-    paused = !paused;
+  document.addEventListener('portfolio:motion', event => {
+    paused = event.detail.disabled;
     scrollPosition = window.scrollY;
-    toggle.setAttribute('aria-pressed', String(paused));
-    toggle.setAttribute('aria-label', paused ? 'Resume character animation' : 'Pause character animation');
-    toggle.innerHTML = paused ? 'Play <span aria-hidden="true">▷</span>' : 'Pause <span aria-hidden="true">Ⅱ</span>';
+    updateControl();
     activate();
   });
   window.addEventListener('pointermove', event => {

@@ -1,0 +1,192 @@
+{
+  "projects": [
+    {
+      "id": "remind",
+      "slug": "neuroweave",
+      "name": "NeuroWeave",
+      "category": "AI / Healthcare",
+      "year": "2026",
+      "summary": "Deep learning for connectome analysis and neurological recovery prediction. Published as ReMind at IEEE ICIETSD 2026.",
+      "problem": "Explore how MRI data and brain connectivity analysis can support research into neurological recovery after stroke and traumatic brain injury.",
+      "contributions": [
+        "PyTorch models and neurological data preprocessing",
+        "Asynchronous FastAPI endpoints for secure data ingestion and concurrent inference"
+      ],
+      "approach": "The project connects neurological data preprocessing and deep learning analysis with a Python API layer. PyTorch supports the modelling work, while asynchronous FastAPI endpoints expose the analysis workflow.",
+      "engineering": "The engineering work spans two connected concerns: preparing neurological data for modelling, and exposing inference through an asynchronous backend. Docker is part of the documented development stack.",
+      "stack": [
+        "FastAPI",
+        "PyTorch",
+        "Docker"
+      ],
+      "workflow": [
+        "MRI data",
+        "Preprocessing",
+        "PyTorch analysis",
+        "FastAPI endpoints"
+      ],
+      "outcome": "Published as ReMind at IEEE ICIETSD 2026. The ReMind team also won third prize at the ELYSIA Project Competition.",
+      "paper": {
+        "title": "ReMind: Connectome Analysis for Predicting Neurological Recovery",
+        "venue": "IEEE ICIETSD",
+        "year": "2026",
+        "role": "Co-author",
+        "doi": "10.1109/ICIETSD68684.2026.11584890",
+        "description": "Connectome analysis and deep learning for neurological recovery prediction using MRI data."
+      },
+      "repository": "https://github.com/anjanareghu/NeuroWeave_Deep_Learning_Based_Connectome_Analysis_for_Neurological_Recovery",
+      "image": "assets/remind.svg",
+      "alt": "Concept illustration of a brain connectivity network.",
+      "photo": "photos/ReMind.jpeg",
+      "photoWidth": 910,
+      "photoHeight": 1280,
+      "photoAlt": "ReMind team and mentor together outdoors.",
+      "photoCaption": "ReMind / ICIETSD 2026",
+      "team": [
+        "Aryan S",
+        "Alen Sam Das",
+        "Daewoo Krishna S"
+      ],
+      "guide": "Geethumol PV",
+      "teaser": "Deep learning for neurological recovery.",
+      "features": [
+        "PyTorch models and neurological data preprocessing",
+        "Asynchronous FastAPI endpoints for secure data ingestion and concurrent inference"
+      ],
+      "screenshots": []
+    },
+    {
+      "id": "stellaris",
+      "slug": "stellaris-ai",
+      "name": "StellarisAI",
+      "category": "AI / Natural language processing",
+      "year": "2025",
+      "summary": "An AI-powered smart hiring system combining LLaMA 3.2, retrieval-augmented generation, and NLP for context-aware candidate evaluation.",
+      "problem": "Bring relevant candidate information into an AI-assisted hiring workflow so evaluations can use retrieved context alongside language-model responses.",
+      "contributions": [
+        "RAG pipelines and prompt engineering for candidate evaluation",
+        "Flask REST APIs for real-time recruitment workflows"
+      ],
+      "approach": "StellarisAI combines retrieval-augmented generation, NLP, and LLaMA 3.2 for candidate evaluation. Flask REST APIs connect these capabilities to the recruitment workflow.",
+      "engineering": "The technical focus is connecting retrieved context with a language model, then making that workflow usable through backend APIs. The project brings prompt engineering and application development into the same system.",
+      "stack": [
+        "Python",
+        "Flask",
+        "LLaMA 3.2",
+        "RAG",
+        "NLP"
+      ],
+      "workflow": [
+        "Candidate information",
+        "Retrieved context",
+        "LLaMA 3.2 + NLP",
+        "Flask REST APIs"
+      ],
+      "outcome": "The team project became Stellaris AI: Personalized AI for Smart Hiring, published at IEEE ICCPCT 2025. Anjana is the second author.",
+      "paper": {
+        "title": "Stellaris AI: Personalized AI for Smart Hiring",
+        "venue": "IEEE ICCPCT",
+        "year": "2025",
+        "role": "Second author",
+        "doi": "10.1109/ICCPCT65132.2025.11176675",
+        "description": "Personalized AI for smart hiring through language models, retrieval-augmented generation, and natural language processing."
+      },
+      "repository": "https://github.com/anjanareghu/stellaris-ai",
+      "image": "assets/stellaris.svg",
+      "alt": "Concept illustration connecting a candidate profile with an AI chat interface.",
+      "photo": "photos/Stellaris.jpeg",
+      "photoWidth": 3024,
+      "photoHeight": 4008,
+      "photoAlt": "Stellaris AI team and mentor together in a college corridor.",
+      "photoCaption": "Stellaris AI / IEEE ICCPCT 2025",
+      "team": [
+        "Aryan S",
+        "Alen Sam Das",
+        "Daewoo Krishna S"
+      ],
+      "guide": "Dr. Anju J Prakash",
+      "teaser": "Context-aware AI for smarter hiring.",
+      "features": [
+        "RAG pipelines and prompt engineering for candidate evaluation",
+        "Flask REST APIs for real-time recruitment workflows"
+      ],
+      "screenshots": []
+    },
+    {
+      "id": "foodsnap",
+      "slug": "foodsnap-ai",
+      "name": "FoodSnap AI",
+      "category": "Full-stack / Computer vision",
+      "teaser": "Food recognition with nutrition insights.",
+      "summary": "Food recognition with nutrition information from an image, delivered through a web application.",
+      "features": [
+        "Image-based food recognition",
+        "Nutrition lookup through connected APIs"
+      ],
+      "stack": [
+        "React",
+        "Flask",
+        "Google Vision",
+        "Nutritionix"
+      ],
+      "workflow": [
+        "Food image",
+        "Google Vision",
+        "Nutritionix",
+        "Nutrition information"
+      ],
+      "repository": "https://github.com/anjanareghu/FoodSnapAI",
+      "image": "assets/foodsnap.svg",
+      "alt": "Concept illustration of food recognition and nutrition categories.",
+      "screenshots": []
+    },
+    {
+      "id": "sprintmind",
+      "slug": "sprintmind-ai",
+      "name": "SprintMind AI",
+      "category": "Web application / AI",
+      "teaser": "AI summaries for sprint planning.",
+      "summary": "An AI sprint-summary project built with Next.js and Firebase.",
+      "features": [
+        "AI sprint summaries"
+      ],
+      "stack": [
+        "Next.js",
+        "Firebase"
+      ],
+      "workflow": [
+        "Sprint information",
+        "AI summaries"
+      ],
+      "repository": "https://github.com/anjanareghu/SprintMind-AI",
+      "image": "assets/sprintmind.svg",
+      "alt": "Concept illustration of sprint notes being organized into a summary.",
+      "screenshots": []
+    },
+    {
+      "id": "food-d",
+      "slug": "food-d",
+      "name": "Food_D",
+      "category": "Full-stack / Delivery",
+      "teaser": "Live matching for delivery workflows.",
+      "summary": "A real-time delivery optimization project focused on live delivery matching, using React, Spring Boot, and Go.",
+      "features": [
+        "Live delivery matching"
+      ],
+      "stack": [
+        "React",
+        "Spring Boot",
+        "Go"
+      ],
+      "workflow": [
+        "Delivery requests",
+        "Live matching",
+        "Delivery workflow"
+      ],
+      "repository": "https://github.com/anjanareghu/Food_D-Real-Time-Delivery-Optimization",
+      "image": "assets/food-d.svg",
+      "alt": "Concept illustration of connected pickup and delivery locations.",
+      "screenshots": []
+    }
+  ]
+}

@@ -2,7 +2,7 @@
 (() => {
   const root = document.documentElement;
   try {
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches || location.hash ||
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches || sessionStorage.getItem('anjana:motion-paused') === '1' || location.hash ||
         sessionStorage.getItem('anjana:introduced:v2') || scrollY > 0) return;
   } catch (_) { return; }
   root.classList.add('intro-pending');

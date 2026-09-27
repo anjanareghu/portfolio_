@@ -4,6 +4,7 @@
   const root = document.documentElement;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   const fine = matchMedia('(hover: hover) and (pointer: fine)');
+  const motionDisabled = () => reduced.matches || !!window.PortfolioMotion?.disabled;
   const clamp = value => Math.max(0, Math.min(1, value));
   const ease = value => 1 - Math.pow(1 - value, 4);
   const hero = document.getElementById('home');
@@ -31,10 +32,6 @@
       letters.push({ node, index, glyph });
     }
   }
-  const headings = [...document.querySelectorAll('main section h2')].map(element => {
-    element.setAttribute('data-motion-heading', '');
-    return { element, top: 0 };
-  });
   const loader = document.querySelector('.intro-screen');
   let introFrame = 0, introDone = !root.classList.contains('intro-pending');
   let target = 25, displayed = 0, readyAt = null, landingAt = null, previous = 0;
@@ -101,14 +98,20 @@
   let scrollFrame = 0, heroStart = 0, heroRange = 1, pinned = false;
   let openingSignature = '';
   function measure() {
-    heroStart = hero.getBoundingClientRect().top + scrollY;
+    const heroDocumentTop = hero.getBoundingClientRect().top + scrollY;
+    const headerHeight = innerWidth > 1000 ? document.querySelector('.site-header')?.offsetHeight || 0 : 0;
     const sceneHeight = scene.offsetHeight;
-    pinned = !reduced.matches && fine.matches && innerWidth > 1000 && sceneHeight + 20 <= innerHeight;
+    const cinematic = !motionDisabled() && fine.matches && innerWidth > 1000 && innerHeight >= 650;
+    pinned = cinematic && sceneHeight + headerHeight + 20 <= innerHeight;
+    heroStart = pinned ? Math.max(0, heroDocumentTop - headerHeight) : heroDocumentTop;
     heroRange = pinned ? Math.round(innerHeight * .95) : Math.max(1, sceneHeight * .8);
     root.style.setProperty('--hero-scene-height', `${sceneHeight}px`);
     root.style.setProperty('--hero-runway', `${heroRange}px`);
-    root.style.setProperty('--hero-overlap', `${Math.min(180, sceneHeight * .22)}px`);
+    root.style.setProperty('--opening-top', `${headerHeight}px`);
+    root.style.setProperty('--anchor-offset', `${headerHeight + 24}px`);
+    root.style.setProperty('--hero-overlap', `${Math.min(260, sceneHeight * .32)}px`);
     root.classList.toggle('opening-pinned', pinned);
+    root.classList.toggle('character-scenes', cinematic);
     // Ranges measure the original shaped text; the resting title is never split.
     const titleBounds = title.getBoundingClientRect();
     letters.forEach(({ node, index, glyph }) => {
@@ -117,23 +120,18 @@
       range.setEnd(node, index + 1);
       glyph.style.left = `${range.getBoundingClientRect().left - titleBounds.left}px`;
     });
-    headings.forEach(heading => {
-      // Subtract our own transform from measurement to prevent cumulative drift.
-      const offset = parseFloat(heading.element.style.getPropertyValue('--heading-y')) || 0;
-      heading.top = heading.element.getBoundingClientRect().top + scrollY - offset;
-    });
-    const signature = `${pinned}:${heroStart}:${heroRange}:${sceneHeight}`;
+    const signature = `${cinematic}:${pinned}:${heroStart}:${heroRange}:${sceneHeight}`;
     if (signature !== openingSignature) {
       openingSignature = signature;
-      window.portfolioCharacter?.setOpening({ enabled: pinned, start: heroStart, range: heroRange });
+      window.portfolioCharacter?.setOpening({ enabled: cinematic, start: heroStart, range: heroRange });
       document.dispatchEvent(new CustomEvent('portfolio:opening-layout'));
     }
     scheduleScroll();
   }
   function renderScroll() {
     scrollFrame = 0;
-    root.classList.toggle('motion-ready', !reduced.matches && introDone);
-    if (reduced.matches || !introDone) return;
+    root.classList.toggle('motion-ready', !motionDisabled() && introDone);
+    if (motionDisabled() || !introDone) return;
     const progress = clamp((scrollY - heroStart) / heroRange);
     title.classList.toggle('hero-letters-active', progress > 0);
     const travel = [30, 45, 20, 55, 36, 48, 25, 42, 32];
@@ -146,11 +144,7 @@
     });
     hero.style.setProperty('--hero-copy-y', `${-progress * 24}px`);
     hero.style.setProperty('--hero-copy-clip', `${clamp((progress - .12) / .45) * 100}%`);
-    headings.forEach(({ element, top }) => {
-      const entry = clamp((top - scrollY - innerHeight * .65) / (innerHeight * .3));
-      element.style.setProperty('--heading-y', `${entry * (fine.matches ? 28 : 12)}px`);
-      element.style.setProperty('--heading-clip', `${entry * 100}%`);
-    });
+
   }
   function scheduleScroll() { if (!scrollFrame) scrollFrame = requestAnimationFrame(renderScroll); }
   window.addEventListener('scroll', () => {
@@ -165,7 +159,7 @@
   reduced.addEventListener('change', () => { if (reduced.matches) finishIntro(); measure(); });
 
   // The original sentences and project links remain usable without JavaScript.
-  const statement = document.querySelector('.about-profile p');
+  const statement = document.querySelector('.about-statement') || document.querySelector('.about-profile p');
   const phrases = [...statement.querySelectorAll('.about-phrase')];
   const preview = document.createElement('div');
   preview.className = 'about-preview';
@@ -183,7 +177,7 @@
     caption.textContent = phrase.dataset.project;
     const link = document.createElement('a');
     link.href = phrase.getAttribute('href');
-    link.textContent = 'View project ↗';
+    link.textContent = phrase.getAttribute('href') === '#research' ? 'View research ↗' : 'View project ↗';
     link.className = 'about-preview-link';
     link.addEventListener('click', () => {
       document.getElementById(phrase.dataset.tab)?.click();
@@ -196,7 +190,7 @@
   });
   let active = null, previewFrame = 0, hideTimer = 0, lastTime = 0;
   let x = 0, y = 0, targetX = 0, targetY = 0;
-  const floating = () => fine.matches && !reduced.matches;
+  const floating = () => fine.matches && !motionDisabled();
   function hidePreview() {
     clearTimeout(hideTimer);
     active = null;
@@ -304,6 +298,11 @@
   window.addEventListener('resize', arrangePreview, { passive: true });
   fine.addEventListener('change', arrangePreview);
   reduced.addEventListener('change', arrangePreview);
+  document.addEventListener('portfolio:motion', () => {
+    if (motionDisabled()) finishIntro();
+    measure();
+    arrangePreview();
+  });
   arrangePreview();
   measure();
 })();

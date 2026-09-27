@@ -18,10 +18,14 @@
     },
     skills: [...document.querySelectorAll('.toolkit-card')].map(card => ({ area: text(card, 'h3'), technologies: text(card, 'p') })),
     additionalSkills: ['React', 'JavaScript', 'HTML', 'CSS', 'C', 'SQL', 'Java (academic coursework)', 'TensorFlow (familiar)', 'Keras (familiar)', 'Django (familiar)', 'Matplotlib', 'Seaborn'],
-    projects: [...document.querySelectorAll('.project-panel')].map(panel => ({
-      id: panel.id.replace('panel-', ''), name: text(panel, 'h3'), description: text(panel, '.project-copy > p'),
-      technologies: text(panel, '.spec-list dd'), features: [...panel.querySelectorAll('.project-features li')].map(li => li.textContent.trim()),
-      repository: panel.querySelector('.project-source').href, section: 'work', tab: 'tab-' + panel.id.replace('panel-', ''),
+    projects: (window.PortfolioProjects || []).map(project => ({
+      id: project.id, name: project.name, description: project.summary,
+      technologies: project.stack.join(' · '), features: project.features,
+      repository: project.repository, href: `projects/${project.slug}.html`, section: 'work', target: '#panel-' + project.id,
+    })),
+    research: [...document.querySelectorAll('.research-entry')].map(entry => ({
+      id: entry.id.replace('paper-', ''), title: text(entry, 'h3'), description: text(entry, '.research-description'),
+      venue: text(entry, '.research-meta span:last-child'), year: text(entry, '.research-meta span:first-child').split('/').pop().trim(), role: text(entry, '.research-role'), url: entry.querySelector('.publication-card').href,
     })),
     additionalProjects: [...document.querySelectorAll('.more-projects > a')].map(link => ({ name: text(link, 'strong'), description: text(link, 'small'), repository: link.href })),
     experience: [...document.querySelectorAll('.internship-entry')].map(entry => ({ company: text(entry, 'h3'), role: text(entry, '.internship-role'), date: text(entry, '.internship-date'), description: text(entry, '.internship-description') })),
@@ -52,6 +56,8 @@
     remind: /\b(remind|neuroweave|connectome|icietsd|stroke|neurological)\b/,
     stellaris: /\b(stellaris(?:ai)?|iccpct|hiring|recruitment)\b/,
     foodsnap: /\b(food ?snap(?:ai)?|nutrition|food recognition)\b/,
+    sprintmind: /\b(sprintmind|sprint summary|sprint summaries)\b/,
+    'food-d': /\b(food_d|food d|delivery matching|delivery optimization)\b/,
     elysia: /\b(elysia|ekha|ekah|third prize|3rd prize)\b/,
     dekathon: /\b(dekathon|72 hour|indo malaysian)\b/,
     dreamvestor: /\b(dreamvestor|asap|lightweight llm)\b/,
@@ -92,7 +98,7 @@
         return { paragraphs: [`Anjana worked with ${credits.team.join(', ')}.${credits.guide ? ` Their guide was ${credits.guide}.` : ''}`, 'She credits their collaboration and support in bringing the work to life.'], actions: [action('View recognition', 'recognition', { achievement: entity })], topic: entity };
       }
       if (project && !/\b(award|achievement|present|conference|published|publication|paper|prize|story)\b/.test(query)) {
-        return { paragraphs: [project.description, `Built with ${project.technologies}.`], bullets: project.features, actions: [action('View project', 'work', { tab: project.tab }), { label: 'Repository', href: project.repository }], topic: entity };
+        return { paragraphs: [project.description, `Built with ${project.technologies}.`], bullets: project.features, actions: [{ label: 'Project details', href: project.href }, { label: 'Repository', href: project.repository }], topic: entity };
       }
       if (achievement) return { paragraphs: [achievement.description, achievement.organization], actions: [action('View achievement', 'recognition', { achievement: entity }), ...(achievement.publication ? [{ label: 'Read paper', href: achievement.publication }] : [])], topic: entity };
     }
@@ -111,13 +117,13 @@
       if (selected.length === 1) { const e = selected[0]; return { paragraphs: [`${e.role} at ${e.company} — ${e.date}.`, e.description], actions: [action('View experience', 'experience')], topic: 'experience' }; }
       return { paragraphs: ['Her listed experience focuses on full-stack web development with AI tools:'], bullets: knowledge.experience.map(e => `${e.company} — ${e.role} (${e.date})`), actions: [action('View experience', 'experience')], topic: 'experience' };
     }
-    if (/\b(publication\w*|paper\w*|research)\b/.test(query)) return { paragraphs: ['Anjana has two IEEE publications:'], bullets: ['Stellaris AI: Personalized AI for Smart Hiring — ICCPCT 2025 (second author).', 'ReMind: Connectome Analysis for Predicting Neurological Recovery — ICIETSD 2026.'], actions: knowledge.achievements.filter(a => a.publication).map(a => ({ label: a.organization, href: a.publication })), topic: 'publications' };
+    if (/\b(publication\w*|paper\w*|research)\b/.test(query)) return { paragraphs: ['Anjana has two IEEE publications:'], bullets: knowledge.research.map(paper => `${paper.title} — ${paper.venue} ${paper.year} (${paper.role}).`), actions: [action('Explore research', 'research'), ...knowledge.research.map(paper => ({ label: paper.title, href: paper.url }))], topic: 'publications' };
     if (/\b(achievement\w*|recognition|award\w*|milestone\w*|competition\w*|hackathon\w*)\b/.test(query)) return { paragraphs: ['A few milestones from her journey:'], bullets: ['First prize — AI Insight 2025 RAG coding competition.', 'Third prize — ELYSIA Project Competition with ReMind.', 'IEEE publications at ICCPCT 2025 and ICIETSD 2026.', 'Dekathon 3.0 and Dreamvestor 2.0 district-level participation.'], actions: [action('Explore recognition', 'recognition')], topic: 'achievements' };
     if (/\b(technolog\w*|skills?|stack|languages?|framework\w*|tools?|python|react|javascript|backend|llm|rag|work with)\b/.test(query)) return { paragraphs: ['Her main focus is Python, applied AI, and backend development.'], bullets: knowledge.skills.map(s => `${s.area}: ${s.technologies}`), actions: [action('View skills', 'about')], topic: 'skills' };
     if (/\b(interests?|focus|passion|goals?|looking for|working on)\b/.test(query)) return { paragraphs: [knowledge.about.interests], actions: [action('Explore her work', 'work'), action('Contact Anjana', 'contact')], topic: 'interests' };
     if (/\b(guid(?:e|ed|es)|mentors?|teammates?|co authors?)\b/.test(query)) return { paragraphs: ['Her research collaborations include:'], bullets: ['Stellaris AI: Aryan S, Alen Sam Das, and Daewoo Krishna S; guided by Dr. Anju J Prakash.', 'ReMind: Aryan S, Alen Sam Das, and Daewoo Krishna S; guided by Geethumol PV.', 'Dekathon 3.0: Aryan S and Aishwarya Ammal S.'], actions: [action('View recognition', 'recognition')], topic: null };
     if (/\b(project\w*|built|builds?|portfolio|developed|work)\b/.test(query)) return { paragraphs: ['Her featured projects connect AI with practical applications:'], bullets: knowledge.projects.map(p => `${p.name} — ${p.description}`), actions: [action('Explore projects', 'work')], topic: 'projects' };
-    if (/\b(newsletter|volunteer|leadership|editor)\b/.test(query)) return { paragraphs: [knowledge.about.community], actions: [action('About Anjana', 'about')], topic: 'about' };
+    if (/\b(newsletter|volunteer|leadership|editor)\b/.test(query)) return { paragraphs: [knowledge.about.community], actions: [action('Community experience', 'experience', { target: '#community' })], topic: 'about' };
     if (/\b(who is|about anjana|about her|introduce|background|where is|location|based)\b/.test(query)) return { paragraphs: [knowledge.about.summary, `She is based in ${knowledge.about.location}.`], actions: [action('About Anjana', 'about')], topic: 'about' };
     return fallback();
   }

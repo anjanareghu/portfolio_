@@ -22,8 +22,8 @@
 .hero-scene { display: flow-root; }
 #motion-toggle.is-docked { font: 9px/1.6 'Courier New', monospace; letter-spacing: .035em; }
 .opening-pinned #home { height: calc(var(--hero-scene-height) + var(--hero-runway)); }
-.opening-pinned .hero-scene { position: sticky; top: 0; }
-.opening-pinned #work { margin-top: calc(-1 * var(--hero-overlap)); }
+.opening-pinned .hero-scene { position: sticky; top: var(--opening-top, 0px); }
+.opening-pinned #about { margin-top: calc(-1 * var(--hero-overlap)); }
 .hero-title-source { display: inline; }
 .hero-letter-layer { position: absolute; inset: 0; visibility: hidden; pointer-events: none; }
 .hero-letter { position: absolute; top: 0; font: inherit; letter-spacing: inherit; transform-origin: 50% 70%; }
@@ -51,7 +51,7 @@
   .about-preview-card { transition: none; transform: none; filter: none; }
   .opening-pinned #home { height: auto; }
   .opening-pinned .hero-scene { position: static; }
-  .opening-pinned #work { margin-top: 0; }
+  .opening-pinned #about { margin-top: 0; }
   .motion-ready :is(.hero-top, .hero-bottom, .hero-cta-group, [data-motion-heading]) { transform: none; clip-path: none; }
   .motion-ready .hero-letters-active .hero-title-source { visibility: visible; }
   .hero-letter-layer { display: none; }

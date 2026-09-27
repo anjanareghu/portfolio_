@@ -1,12 +1,12 @@
 // Native download and anchor links remain functional without JavaScript.
 (() => {
   'use strict';
-  const group = document.querySelector('.hero-cta-group');
-  if (!group) return;
+  const groups = [...document.querySelectorAll('.hero-cta-group')];
+  if (!groups.length) return;
   const finePointer = matchMedia('(hover: hover) and (pointer: fine)');
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
-  const targets = [...group.querySelectorAll('.cta-target')];
-  const canMove = () => finePointer.matches && !reduced.matches;
+  const targets = [...document.querySelectorAll('.cta-target')];
+  const canMove = () => finePointer.matches && !reduced.matches && !window.PortfolioMotion?.disabled;
   const lookAt = target => document.dispatchEvent(new CustomEvent('portfolio:character-look', { detail: { target } }));
 
   targets.forEach(zone => {
@@ -49,9 +49,11 @@
     zone.addEventListener('pointercancel', () => { reset(); lookAt(null); });
     finePointer.addEventListener('change', () => { reset(); lookAt(null); });
     reduced.addEventListener('change', () => { reset(); lookAt(null); });
+    document.addEventListener('portfolio:motion', () => { reset(); lookAt(null); });
     window.addEventListener('blur', () => { reset(); lookAt(null); });
   });
 
+  groups.forEach(group => {
   const resume = group.querySelector('.portfolio-cta--resume');
   const status = group.querySelector('.cta-status');
   let successTimer = 0;
@@ -67,4 +69,25 @@
       status.textContent = '';
     }, 1800);
   });
+  });
+  const copyButton = document.querySelector('.copy-email');
+  const emailLink = document.getElementById('contact-email-address');
+  const copyStatus = document.querySelector('.copy-email-status');
+  if (copyButton && emailLink && copyStatus && navigator.clipboard?.writeText) {
+    copyButton.hidden = false;
+    let resetCopy;
+    copyButton.addEventListener('click', async () => {
+      clearTimeout(resetCopy);
+      copyButton.disabled = true;
+      try {
+        await navigator.clipboard.writeText(emailLink.textContent.trim());
+        copyStatus.textContent = 'Email address copied.';
+      } catch (_) {
+        copyStatus.textContent = 'Select and copy the email address above.';
+      } finally {
+        copyButton.disabled = false;
+        resetCopy = setTimeout(() => { copyStatus.textContent = ''; }, 4000);
+      }
+    });
+  }
 })();

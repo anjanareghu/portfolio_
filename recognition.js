@@ -94,10 +94,10 @@
 
   function configure() {
     const wasEnabled = enabled;
-    enabled = desktop.matches && !reduced.matches && !listPreferred;
+    enabled = desktop.matches && !reduced.matches && !window.PortfolioMotion?.disabled && !listPreferred;
     gallery.classList.toggle('is-scroll-story', enabled);
     progress.hidden = !enabled;
-    viewToggle.hidden = !desktop.matches || reduced.matches;
+    viewToggle.hidden = !desktop.matches || reduced.matches || !!window.PortfolioMotion?.disabled;
     viewToggle.textContent = listPreferred ? 'View as stack' : 'View as list';
     viewToggle.setAttribute('aria-pressed', String(listPreferred));
     activeIndex = -1;
@@ -129,13 +129,14 @@
   window.addEventListener('resize', () => { configure(); }, { passive: true });
   desktop.addEventListener('change', configure);
   reduced.addEventListener('change', configure);
+  document.addEventListener('portfolio:motion', configure);
   document.addEventListener('portfolio:layout', measure);
   document.addEventListener('portfolio:opening-layout', measure);
   window.addEventListener('load', measure);
   document.addEventListener('portfolio:recognition', event => {
     const entry = entries.find(item => item.id === `recognition-${event.detail?.id}`);
     if (!entry) return;
-    const behavior = event.detail.behavior === 'instant' || reduced.matches ? 'instant' : 'smooth';
+    const behavior = event.detail.behavior === 'instant' || reduced.matches || window.PortfolioMotion?.disabled ? 'instant' : 'smooth';
     if (enabled) {
       measure();
       window.scrollTo({ top: start + step * (entries.indexOf(entry) + 0.28), behavior });
